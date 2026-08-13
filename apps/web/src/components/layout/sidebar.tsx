@@ -141,7 +141,7 @@ export function Sidebar({ collapsed = false, onToggle }: SidebarProps) {
         )}
       >
         {collapsed ? (
-          <span className="text-xl font-bold text-sidebar-foreground">T</span>
+          <span className="text-xl font-bold text-sidebar-foreground">L</span>
         ) : (
           <span className="text-xl font-bold tracking-tight text-sidebar-foreground">
             LUMAVI

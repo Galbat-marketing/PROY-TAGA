@@ -44,7 +44,7 @@ export default function LoginPage() {
         <CardHeader className="space-y-1 text-center">
           <div className="mb-4 flex justify-center">
             <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-primary text-xl font-bold text-white">
-              T
+              L
             </div>
           </div>
           <CardTitle className="text-2xl font-bold">LUMAVI ERP</CardTitle>
