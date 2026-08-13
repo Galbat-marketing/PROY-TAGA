@@ -1,0 +1,27 @@
+[project]
+ref = "taga-erp"
+
+[functions]
+verify_jwt = true
+import_map = "./_shared/import_map.json"
+
+[functions.generar-pdf]
+verify_jwt = true
+
+[functions.enviar-email]
+verify_jwt = true
+
+[functions.calcular-comisiones]
+verify_jwt = true
+
+[functions.sincronizar-movil]
+verify_jwt = true
+
+[functions.webhooks]
+verify_jwt = false
+
+[functions.busqueda-global]
+verify_jwt = true
+
+[functions.notificar-vencimientos]
+verify_jwt = false

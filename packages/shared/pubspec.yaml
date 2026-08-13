@@ -1,0 +1,7 @@
+name: taga_shared
+description: Shared types and utilities for TAGA ERP
+version: 1.0.0
+publish_to: none
+
+environment:
+  sdk: ^3.5.0

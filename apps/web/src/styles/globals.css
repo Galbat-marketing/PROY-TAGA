@@ -1,0 +1,316 @@
+@import "tailwindcss";
+@import "react-day-picker/style.css";
+
+/* ─── Dark mode variant for Tailwind v4 ─── */
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  /* Brand colors (default: Verde palette) */
+  --color-primary: #0A6E4F;
+  --color-primary-foreground: #FFFFFF;
+  --color-primary-light: #F0FDF4;
+  --color-primary-dark: #166534;
+
+  /* Semantic colors */
+  --color-background: #FAFAF9;
+  --color-foreground: #1C1917;
+  --color-card: #FFFFFF;
+  --color-muted: #F5F5F4;
+  --color-muted-foreground: #78716C;
+  --color-border: #E7E5E4;
+  --color-ring: #0A6E4F;
+  --color-accent: #E8F5E9;
+
+  /* Status colors */
+  --color-success: #10B981;
+  --color-warning: #F59E0B;
+  --color-destructive: #DC2626;
+  --color-info: #3B82F6;
+
+  /* Sidebar (light mode defaults) */
+  --color-sidebar: #FFFFFF;
+  --color-sidebar-foreground: #1C1917;
+  --color-sidebar-muted: #F5F5F4;
+  --color-sidebar-accent: #0A6E4F;
+
+  /* Typography */
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  /* Radius */
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+
+  /* Shadows */
+  --shadow-card: 0 1px 3px 0 rgb(0 0 0 / 0.04), 0 1px 2px -1px rgb(0 0 0 / 0.06);
+  --shadow-card-hover: 0 4px 6px -1px rgb(0 0 0 / 0.06), 0 2px 4px -2px rgb(0 0 0 / 0.08);
+  --shadow-dialog: 0 20px 25px -5px rgb(0 0 0 / 0.10), 0 8px 10px -6px rgb(0 0 0 / 0.10);
+}
+
+/* ═══════════════════════════════════════════════════════
+   PALETTE OVERRIDES
+   Each palette overrides the default CSS custom
+   properties for primary, accent, ring, and sidebar accent.
+   ═══════════════════════════════════════════════════════ */
+
+/* ─── Verde (default, defined in @theme) ─── */
+/* No overrides needed — it's the base theme */
+
+/* ─── Azul ─── */
+[data-palette="azul"] {
+  --color-primary: #2563EB;
+  --color-primary-foreground: #FFFFFF;
+  --color-primary-light: #EFF6FF;
+  --color-primary-dark: #1E40AF;
+  --color-ring: #2563EB;
+  --color-accent: #EFF6FF;
+  --color-sidebar-accent: #2563EB;
+}
+
+/* ─── Púrpura ─── */
+[data-palette="purpura"] {
+  --color-primary: #7C3AED;
+  --color-primary-foreground: #FFFFFF;
+  --color-primary-light: #F5F3FF;
+  --color-primary-dark: #5B21B6;
+  --color-ring: #7C3AED;
+  --color-accent: #F5F3FF;
+  --color-sidebar-accent: #7C3AED;
+}
+
+/* ─── Rojo ─── */
+[data-palette="rojo"] {
+  --color-primary: #DC2626;
+  --color-primary-foreground: #FFFFFF;
+  --color-primary-light: #FEF2F2;
+  --color-primary-dark: #B91C1C;
+  --color-ring: #DC2626;
+  --color-accent: #FEF2F2;
+  --color-sidebar-accent: #DC2626;
+}
+
+/* ─── Naranja ─── */
+[data-palette="naranja"] {
+  --color-primary: #F97316;
+  --color-primary-foreground: #FFFFFF;
+  --color-primary-light: #FFF7ED;
+  --color-primary-dark: #C2410C;
+  --color-ring: #F97316;
+  --color-accent: #FFF7ED;
+  --color-sidebar-accent: #F97316;
+}
+
+/* ─── Teal ─── */
+[data-palette="teal"] {
+  --color-primary: #0D9488;
+  --color-primary-foreground: #FFFFFF;
+  --color-primary-light: #F0FDFA;
+  --color-primary-dark: #0F766E;
+  --color-ring: #0D9488;
+  --color-accent: #F0FDFA;
+  --color-sidebar-accent: #0D9488;
+}
+
+/* ═══════════════════════════════════════════════════════
+   DARK MODE
+   ═══════════════════════════════════════════════════════ */
+
+.dark {
+  --color-background: #1C1917;
+  --color-foreground: #FAFAF9;
+  --color-card: #292524;
+  --color-muted: #292524;
+  --color-muted-foreground: #A8A29E;
+  --color-border: #44403C;
+
+  /* Default primary (Verde) in dark mode */
+  --color-primary: #059669;
+  --color-primary-light: #052E16;
+  --color-primary-dark: #34D399;
+  --color-accent: #052E16;
+  --color-ring: #059669;
+  --color-sidebar-accent: #059669;
+
+  /* Sidebar dark mode */
+  --color-sidebar: #1C1917;
+  --color-sidebar-foreground: #FAFAF9;
+  --color-sidebar-muted: #292524;
+}
+
+/* ─── Dark mode + palette combos ─── */
+
+.dark[data-palette="azul"] {
+  --color-primary: #3B82F6;
+  --color-primary-light: #172554;
+  --color-primary-dark: #93C5FD;
+  --color-accent: #172554;
+  --color-ring: #3B82F6;
+  --color-sidebar-accent: #3B82F6;
+}
+
+.dark[data-palette="purpura"] {
+  --color-primary: #8B5CF6;
+  --color-primary-light: #1E1B4B;
+  --color-primary-dark: #C4B5FD;
+  --color-accent: #1E1B4B;
+  --color-ring: #8B5CF6;
+  --color-sidebar-accent: #8B5CF6;
+}
+
+.dark[data-palette="rojo"] {
+  --color-primary: #EF4444;
+  --color-primary-light: #450A0A;
+  --color-primary-dark: #FCA5A5;
+  --color-accent: #450A0A;
+  --color-ring: #EF4444;
+  --color-sidebar-accent: #EF4444;
+}
+
+.dark[data-palette="naranja"] {
+  --color-primary: #FB923C;
+  --color-primary-light: #431407;
+  --color-primary-dark: #FDBA74;
+  --color-accent: #431407;
+  --color-ring: #FB923C;
+  --color-sidebar-accent: #FB923C;
+}
+
+.dark[data-palette="teal"] {
+  --color-primary: #14B8A6;
+  --color-primary-light: #042F2E;
+  --color-primary-dark: #5EEAD4;
+  --color-accent: #042F2E;
+  --color-ring: #14B8A6;
+  --color-sidebar-accent: #14B8A6;
+}
+
+/* ═══════════════════════════════════════════════════════
+   LANDING PAGE THEME VARIABLES
+   ═══════════════════════════════════════════════════════ */
+
+[data-landing-theme="dark"] {
+  --lp-bg: #050505;
+  --lp-text: #ffffff;
+  --lp-text-secondary: rgba(255, 255, 255, 0.4);
+  --lp-text-muted: rgba(255, 255, 255, 0.3);
+  --lp-text-nav: rgba(255, 255, 255, 0.5);
+  --lp-border: rgba(255, 255, 255, 0.05);
+  --lp-border-subtle: rgba(255, 255, 255, 0.04);
+  --lp-card-bg: linear-gradient(to bottom, rgba(255,255,255,0.04), rgba(255,255,255,0.01));
+  --lp-card-bg-solid: rgba(255, 255, 255, 0.04);
+  --lp-card-bg-hover: rgba(255, 255, 255, 0.06);
+  --lp-overlay: rgba(0, 0, 0, 0.5);
+  --lp-footer-bg: #000000;
+  --lp-hero-glow: rgba(6, 182, 212, 0.1);
+  --lp-section-alt: transparent;
+  color-scheme: dark;
+}
+
+[data-landing-theme="light"] {
+  --lp-bg: #f8fafc;
+  --lp-text: #0f172a;
+  --lp-text-secondary: #64748b;
+  --lp-text-muted: #94a3b8;
+  --lp-text-nav: #64748b;
+  --lp-border: rgba(0, 0, 0, 0.08);
+  --lp-border-subtle: rgba(0, 0, 0, 0.04);
+  --lp-card-bg: #ffffff;
+  --lp-card-bg-solid: #ffffff;
+  --lp-card-bg-hover: #f8fafc;
+  --lp-overlay: rgba(255, 255, 255, 0.95);
+  --lp-footer-bg: #ffffff;
+  --lp-hero-glow: rgba(6, 182, 212, 0.06);
+  --lp-section-alt: rgba(0, 0, 0, 0.02);
+  color-scheme: light;
+}
+
+/* ─── Landing page theme overrides (safety net) ─── */
+@layer utilities {
+  [data-landing-theme="dark"] {
+    background-color: #050505 !important;
+    color: #ffffff !important;
+  }
+  [data-landing-theme="light"] {
+    background-color: var(--lp-bg) !important;
+    color: var(--lp-text) !important;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════
+   SMOOTH TRANSITIONS (theme switches only)
+   ═══════════════════════════════════════════════════════ */
+
+@media (prefers-reduced-motion: no-preference) {
+  html,
+  html *,
+  html *::before,
+  html *::after {
+    transition: background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease, box-shadow 0.25s ease;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════
+   BASE LAYER
+   ═══════════════════════════════════════════════════════ */
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+    font-size: 1rem;
+    line-height: 1.5;
+  }
+
+  /* Focus ring global */
+  :focus-visible {
+    outline: 2px solid var(--color-ring);
+    outline-offset: 2px;
+  }
+}
+
+@layer utilities {
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-border) transparent;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════
+   DATE / TIME INPUT ICONS
+   The native calendar picker icon is black by default and
+   invisible on dark backgrounds. `color-scheme: dark` tells
+   the browser to render native form controls (calendar icon,
+   stepper arrows) with dark‑theme colors — white/light icons.
+   Works in Chrome, Edge, Safari, and Firefox.
+   ═══════════════════════════════════════════════════════ */
+
+.dark input[type="date"],
+.dark input[type="datetime-local"],
+.dark input[type="month"],
+.dark input[type="week"],
+.dark input[type="time"] {
+  color-scheme: dark;
+}
+
+/* ═══════════════════════════════════════════════════════
+   NUMBER INPUT SPINNER ARROWS
+   Same approach — native stepper arrows render in dark
+   theme when we tell the browser we're in a dark context.
+   ═══════════════════════════════════════════════════════ */
+
+.dark input[type="number"] {
+  color-scheme: dark;
+}
