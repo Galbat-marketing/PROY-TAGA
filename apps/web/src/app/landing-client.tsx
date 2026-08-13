@@ -282,11 +282,6 @@ function HeroSection({ metrics }: { metrics: LandingMetrics }) {
             con Inteligencia
           </h1>
 
-          <p className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-[var(--lp-text-secondary)] sm:text-lg">
-            LUMAVI es la plataforma integral para importación. Gestiona ofertas,
-            productos, clientes y logística desde un solo lugar con analytics en tiempo real.
-          </p>
-
           {/* CTA */}
           <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
             <LinkTo
