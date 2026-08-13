@@ -144,7 +144,7 @@ export function Sidebar({ collapsed = false, onToggle }: SidebarProps) {
           <span className="text-xl font-bold text-sidebar-foreground">T</span>
         ) : (
           <span className="text-xl font-bold tracking-tight text-sidebar-foreground">
-            TAGA
+            LUMAVI
           </span>
         )}
       </div>

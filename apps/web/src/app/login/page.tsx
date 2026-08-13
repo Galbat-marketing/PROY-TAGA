@@ -47,7 +47,7 @@ export default function LoginPage() {
               T
             </div>
           </div>
-          <CardTitle className="text-2xl font-bold">TAGA ERP</CardTitle>
+          <CardTitle className="text-2xl font-bold">LUMAVI ERP</CardTitle>
           <CardDescription>Ingresa tus credenciales para acceder</CardDescription>
         </CardHeader>
         <CardContent>
