@@ -162,7 +162,7 @@ function Navbar() {
         {/* Logo */}
         <LinkTo href="#hero" className="flex items-center gap-2">
           <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-[#bb7dae] to-[#29bdbf]">
-            <span className="text-xs font-black text-white">T</span>
+            <span className="text-xs font-black text-white">L</span>
           </div>
           <span className="text-base font-bold tracking-tight text-[var(--lp-text)]">LUMAVI</span>
         </LinkTo>
