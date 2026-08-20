@@ -48,7 +48,7 @@ export default function PagoDetailPage() {
   async function handleCambiarEstado(estado: string) {
     try {
       await actualizarEstadoPago(id, estado)
-      toast.success(`Pago ${estado === "aprobado" ? "aprobado" : estado === "rechazado" ? "rechazado" : "actualizado"} correctamente`)
+      toast.success(`Pago ${estado === "aprobado" ? "aprobado" : estado === "pagado" ? "marcado como pagado" : estado === "rechazado" ? "rechazado" : "actualizado"} correctamente`)
       refetch()
     } catch (error) {
       toast.error((error as Error).message)
@@ -59,8 +59,8 @@ export default function PagoDetailPage() {
     e.preventDefault()
     setLoading(true)
     try {
-      await actualizarEstadoPago(id, "aprobado", { metodo_pago: metodoPago, referencia })
-      toast.success("Pago aprobado correctamente")
+      await actualizarEstadoPago(id, "pagado", { metodo_pago: metodoPago, referencia })
+      toast.success("Pago marcado como pagado correctamente")
       setShowAprobarForm(false)
       refetch()
     } catch (error) {
@@ -130,12 +130,17 @@ export default function PagoDetailPage() {
             {pago.estado === "pendiente_aprobacion" && !showAprobarForm && (
               <>
                 <Button className="w-full" onClick={() => setShowAprobarForm(true)}>
-                  <CheckCircle className="h-4 w-4" /> Aprobar pago
+                  <CheckCircle className="h-4 w-4" /> Pagar
                 </Button>
                 <Button className="w-full" variant="destructive" onClick={() => handleCambiarEstado("rechazado")}>
                   <XCircle className="h-4 w-4" /> Rechazar pago
                 </Button>
               </>
+            )}
+            {pago.estado === "aprobado" && (
+              <Button className="w-full" onClick={() => handleCambiarEstado("pagado")}>
+                <CheckCircle className="h-4 w-4" /> Marcar como pagado
+              </Button>
             )}
             {showAprobarForm && (
               <form onSubmit={handleAprobar} className="space-y-3">

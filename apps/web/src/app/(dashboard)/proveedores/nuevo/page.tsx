@@ -18,7 +18,7 @@ export default function NuevoProveedorPage() {
   const queryClient = useQueryClient()
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<ProveedorFormValues>({
     resolver: zodResolver(proveedorSchema),
-    defaultValues: { moneda_default: "USD" },
+    defaultValues: { moneda_default: "USD", rating: 0 },
   })
 
   const { data: codificadores } = useCodificadores()
@@ -88,9 +88,22 @@ export default function NuevoProveedorPage() {
               {errors.pais && <p className="text-xs text-destructive">{errors.pais.message}</p>}
             </div>
           </div>
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Condiciones de Pago</label>
-            <Input {...register("condiciones_pago")} placeholder="Ej: 30 días" />
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Rating</label>
+              <select {...register("rating")} className="flex h-11 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm">
+                <option value="0">Sin calificar</option>
+                <option value="1">1 - Muy malo</option>
+                <option value="2">2 - Malo</option>
+                <option value="3">3 - Regular</option>
+                <option value="4">4 - Bueno</option>
+                <option value="5">5 - Excelente</option>
+              </select>
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Condiciones de Pago</label>
+              <Input {...register("condiciones_pago")} placeholder="Ej: 30 días" />
+            </div>
           </div>
         </div>
         <div className="flex gap-3">

@@ -10,7 +10,7 @@ export const proveedorSchema = z.object({
   moneda_default: z.string(),
   condiciones_pago: z.string().nullable().optional(),
   tipo_proveedor: z.string().nullable().optional(),
-  rating: z.number().optional(),
+  rating: z.coerce.number().int().min(0).max(5).optional(),
   activo: z.boolean().optional(),
 });
 
