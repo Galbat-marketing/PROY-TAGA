@@ -61,6 +61,76 @@ export async function crearUsuario(values: {
   return authUser
 }
 
+export async function getRolesUsuario(usuarioId: string) {
+  const supabase = await createServerSupabase()
+  const { data, error } = await supabase
+    .from("roles_usuarios")
+    .select("rol_id")
+    .eq("usuario_id", usuarioId)
+  if (error) throw new Error("Error al cargar el rol del usuario")
+  return data.map((ru) => ru.rol_id)
+}
+
+export async function actualizarUsuario(id: string, values: {
+  nombre: string
+  apellido: string
+  telefono?: string | null
+  activo: boolean
+  rol_id?: string | null
+  password?: string
+}) {
+  const supabaseAdmin = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    { auth: { persistSession: false } }
+  )
+
+  const authUpdate: { password?: string; user_metadata: { nombre: string; apellido: string } } = {
+    user_metadata: { nombre: values.nombre, apellido: values.apellido },
+  }
+  if (values.password) authUpdate.password = values.password
+
+  const { error: authError } = await supabaseAdmin.auth.admin.updateUserById(id, authUpdate)
+  if (authError) throw new Error(authError.message)
+
+  const { error: userError } = await supabaseAdmin
+    .from("usuarios")
+    .update({
+      nombre: values.nombre,
+      apellido: values.apellido,
+      telefono: values.telefono ?? null,
+      activo: values.activo,
+    })
+    .eq("id", id)
+  if (userError) throw new Error(userError.message)
+
+  if (values.rol_id !== undefined) {
+    await supabaseAdmin.from("roles_usuarios").delete().eq("usuario_id", id)
+    if (values.rol_id) {
+      const { error: rolError } = await supabaseAdmin
+        .from("roles_usuarios")
+        .insert({ usuario_id: id, rol_id: values.rol_id })
+      if (rolError) throw new Error(rolError.message)
+    }
+  }
+
+  return { ok: true }
+}
+
+export async function eliminarUsuario(id: string) {
+  const supabaseAdmin = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    { auth: { persistSession: false } }
+  )
+
+  const { error } = await supabaseAdmin
+    .from("usuarios")
+    .update({ deleted_at: new Date().toISOString() })
+    .eq("id", id)
+  if (error) throw new Error(error.message)
+}
+
 // ─── Roles ──────────────────────────────────────────────
 
 export async function getPermisos() {

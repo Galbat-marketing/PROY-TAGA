@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { PageHeader } from "@/components/shared/page-header"
 import { EntityDocuments } from "@/components/shared/entity-documents"
+import { ProveedorOfertas } from "@/components/proveedores/proveedor-ofertas"
 import { useProveedor } from "@/lib/queries"
 import { eliminarProveedor } from "@/lib/actions/proveedores"
 import { toast } from "sonner"
@@ -107,6 +108,9 @@ export default function ProveedorDetailPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Ofertas relacionadas con pagos */}
+      <ProveedorOfertas proveedorId={id} />
 
       {/* Documentos relacionados */}
       <EntityDocuments entidad="proveedor" entityId={id} />

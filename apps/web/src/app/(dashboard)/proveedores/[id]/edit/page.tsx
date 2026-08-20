@@ -111,9 +111,21 @@ export default function EditarProveedorPage() {
               {errors.pais && <p className="text-xs text-destructive">{errors.pais.message}</p>}
             </div>
           </div>
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Condiciones de Pago</label>
-            <Input {...register("condiciones_pago")} />
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Moneda Default</label>
+              <select {...register("moneda_default")} className="flex h-11 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm">
+                <option value="">Seleccionar...</option>
+                {codificadores?.monedas?.map((m: { codigo: string; nombre: string }) => (
+                  <option key={m.codigo} value={m.codigo}>{m.nombre}</option>
+                ))}
+              </select>
+              {errors.moneda_default && <p className="text-xs text-destructive">{errors.moneda_default.message}</p>}
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Condiciones de Pago</label>
+              <Input {...register("condiciones_pago")} />
+            </div>
           </div>
         </div>
         <div className="flex gap-3">

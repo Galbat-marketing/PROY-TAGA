@@ -1,14 +1,16 @@
 "use client"
 
-import { useState } from "react"
-import { ArrowLeft, Users, BadgeCheck, XCircle, Plus, Loader2 } from "lucide-react"
+import { useState, useEffect } from "react"
+import { ArrowLeft, Users, BadgeCheck, XCircle, Plus, Loader2, Pencil, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
 import { DataTable } from "@/components/shared/data-table"
-import { useUsuarios, useCrearUsuario, useRoles } from "@/lib/queries"
+import { useUsuarios, useCrearUsuario, useRoles, useRolesUsuario, useActualizarUsuario, useEliminarUsuario } from "@/lib/queries"
 import { type ColumnDef } from "@tanstack/react-table"
 import Link from "next/link"
+import { toast } from "sonner"
 
 interface UsuarioRow {
   id: string
@@ -56,11 +58,130 @@ const columns: ColumnDef<UsuarioRow>[] = [
   },
 ]
 
+function UsuarioModal({ usuario, onClose }: { usuario: UsuarioRow; onClose: () => void }) {
+  const { data: roles } = useRoles()
+  const { data: rolesUsuario } = useRolesUsuario(usuario.id)
+  const { mutate: actualizar, isPending } = useActualizarUsuario()
+
+  const [nombre, setNombre] = useState(usuario.nombre)
+  const [apellido, setApellido] = useState(usuario.apellido)
+  const [telefono, setTelefono] = useState(usuario.telefono ?? "")
+  const [rolId, setRolId] = useState("")
+  const [password, setPassword] = useState("")
+  const [activo, setActivo] = useState(usuario.activo)
+  const [error, setError] = useState("")
+  const [synced, setSynced] = useState(false)
+
+  useEffect(() => {
+    if (rolesUsuario && !synced) {
+      setRolId(rolesUsuario[0] ?? "")
+      setSynced(true)
+    }
+  }, [rolesUsuario, synced])
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    setError("")
+    actualizar(
+      {
+        id: usuario.id,
+        data: {
+          nombre,
+          apellido,
+          telefono: telefono.trim() || null,
+          activo,
+          rol_id: rolId || null,
+          password: password || undefined,
+        },
+      },
+      {
+        onSuccess: () => {
+          toast.success("Usuario actualizado")
+          onClose()
+        },
+        onError: (err) => setError(err.message),
+      }
+    )
+  }
+
+  return (
+    <Dialog open onOpenChange={(open) => !open && onClose()}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Editar usuario</DialogTitle>
+          <DialogDescription>{usuario.email}</DialogDescription>
+        </DialogHeader>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-2">
+              <p className="text-sm font-medium">Nombre</p>
+              <Input value={nombre} onChange={(e) => setNombre(e.target.value)} placeholder="Nombre" required />
+            </div>
+            <div className="space-y-2">
+              <p className="text-sm font-medium">Apellido</p>
+              <Input value={apellido} onChange={(e) => setApellido(e.target.value)} placeholder="Apellido" required />
+            </div>
+          </div>
+          <div className="space-y-2">
+            <p className="text-sm font-medium">Teléfono</p>
+            <Input value={telefono} onChange={(e) => setTelefono(e.target.value)} placeholder="+58 412 000 0000" />
+          </div>
+          <div className="space-y-2">
+            <p className="text-sm font-medium">Rol</p>
+            <select
+              value={rolId}
+              onChange={(e) => setRolId(e.target.value)}
+              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <option value="">Sin rol</option>
+              {roles?.map((r) => (
+                <option key={r.id} value={r.id}>
+                  {r.nombre} — {r.descripcion}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="space-y-2">
+            <p className="text-sm font-medium">Nueva contraseña</p>
+            <Input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Dejar en blanco para no cambiar"
+              minLength={6}
+            />
+          </div>
+          <label className="flex cursor-pointer items-center gap-2 text-sm font-medium">
+            <input
+              type="checkbox"
+              checked={activo}
+              onChange={(e) => setActivo(e.target.checked)}
+              className="h-4 w-4 rounded border-input"
+            />
+            Usuario activo
+          </label>
+          {error && <p className="text-sm text-destructive">{error}</p>}
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={onClose}>Cancelar</Button>
+            <Button type="submit" disabled={isPending} className="gap-2">
+              {isPending && <Loader2 className="h-4 w-4 animate-spin" />}
+              Guardar cambios
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
 export default function UsuariosPage() {
   const { data: usuarios, isLoading } = useUsuarios()
   const { data: roles } = useRoles()
   const { mutate: crear, isPending } = useCrearUsuario()
+  const { mutate: eliminar } = useEliminarUsuario()
   const [showForm, setShowForm] = useState(false)
+  const [editing, setEditing] = useState<UsuarioRow | null>(null)
+  const [deleting, setDeleting] = useState<string | null>(null)
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [nombre, setNombre] = useState("")
@@ -85,6 +206,15 @@ export default function UsuariosPage() {
         onError: (err) => setError(err.message),
       }
     )
+  }
+
+  const handleEliminar = (usuario: UsuarioRow) => {
+    if (!confirm(`¿Eliminar al usuario "${usuario.nombre} ${usuario.apellido}"?`)) return
+    setDeleting(usuario.id)
+    eliminar(usuario.id, {
+      onSuccess: () => { toast.success("Usuario eliminado"); setDeleting(null) },
+      onError: (err) => { toast.error(err.message); setDeleting(null) },
+    })
   }
 
   return (
@@ -165,7 +295,28 @@ export default function UsuariosPage() {
         </div>
       ) : (
         <DataTable
-          columns={columns}
+          columns={[
+            ...columns,
+            {
+              id: "acciones",
+              header: "",
+              cell: ({ row }) => (
+                <div className="flex justify-end gap-1">
+                  <Button variant="ghost" size="sm" onClick={() => setEditing(row.original)}>
+                    <Pencil className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleEliminar(row.original)}
+                    disabled={deleting === row.original.id}
+                  >
+                    {deleting === row.original.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4 text-destructive" />}
+                  </Button>
+                </div>
+              ),
+            },
+          ]}
           data={usuarios ?? []}
           searchKey="email"
           searchPlaceholder="Buscar usuarios..."
@@ -174,6 +325,8 @@ export default function UsuariosPage() {
           emptyDescription="No se encontraron usuarios registrados."
         />
       )}
+
+      {editing && <UsuarioModal usuario={editing} onClose={() => setEditing(null)} />}
     </div>
   )
 }

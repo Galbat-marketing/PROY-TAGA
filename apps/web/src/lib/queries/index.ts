@@ -268,6 +268,29 @@ async function fetchOferta(id: string): Promise<Oferta> {
 export function useOfertas() { return useListQuery<Oferta>(["ofertas"], fetchOfertas) }
 export function useOferta(id: string) { return useDetailQuery<Oferta>(["ofertas", id], () => fetchOferta(id), !!id) }
 
+async function fetchOfertasPorProveedor(proveedorId: string): Promise<Oferta[]> {
+  const { data, error } = await supabase
+    .from("ofertas")
+    .select("*, clientes!left(nombre), codificador_comerciales!left(nombre), fichas_oferta!inner(proveedor_id), pagos!left(estado, monto)")
+    .is("deleted_at", null)
+    .eq("fichas_oferta.proveedor_id", proveedorId)
+    .eq("pagos.proveedor_id", proveedorId)
+    .is("pagos.deleted_at", null)
+    .order("created_at", { ascending: false })
+  if (error) throw error
+  return (data ?? []).map((o) => ({
+    ...o,
+    cliente_nombre: (o.clientes as { nombre?: string } | null)?.nombre ?? null,
+    clientes: undefined,
+    comercial_nombre: (o.codificador_comerciales as { nombre?: string } | null)?.nombre ?? null,
+    codificador_comerciales: undefined,
+  })) as unknown as Oferta[]
+}
+
+export function useOfertasPorProveedor(proveedorId: string) {
+  return useListQuery<Oferta>(["ofertas", "por-proveedor", proveedorId], () => fetchOfertasPorProveedor(proveedorId), STALE.MIN)
+}
+
 export function useCrearOferta() {
   const qc = useQueryClient()
   return useMutation({
@@ -921,6 +944,40 @@ export function useCrearUsuario() {
         body: JSON.stringify(data),
       }).then(async (res) => {
         if (!res.ok) { const err = await res.json(); throw new Error(err.error ?? "Error al crear usuario") }
+        return res.json()
+      }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["usuarios"] }),
+  })
+}
+
+export function useRolesUsuario(usuarioId: string | null) {
+  return useDetailQuery<string[]>(["usuarios", usuarioId, "roles"],
+    () => usuarioSrv.getRolesUsuario(usuarioId!),
+    !!usuarioId, STALE.HIGH)
+}
+
+export function useActualizarUsuario() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ id, data }: { id: string; data: { nombre: string; apellido: string; telefono?: string | null; activo: boolean; rol_id?: string | null; password?: string } }) =>
+      fetch(`/api/usuarios/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      }).then(async (res) => {
+        if (!res.ok) { const err = await res.json(); throw new Error(err.error ?? "Error al actualizar usuario") }
+        return res.json()
+      }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["usuarios"] }),
+  })
+}
+
+export function useEliminarUsuario() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) =>
+      fetch(`/api/usuarios/${id}`, { method: "DELETE" }).then(async (res) => {
+        if (!res.ok) { const err = await res.json(); throw new Error(err.error ?? "Error al eliminar usuario") }
         return res.json()
       }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["usuarios"] }),

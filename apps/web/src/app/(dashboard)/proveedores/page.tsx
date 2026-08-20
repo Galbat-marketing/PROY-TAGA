@@ -1,7 +1,7 @@
 "use client"
 
 import { useRouter } from "next/navigation"
-import { Plus, Truck } from "lucide-react"
+import { Plus, Truck, Edit } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { PageHeader } from "@/components/shared/page-header"
@@ -41,6 +41,28 @@ const columns: ColumnDef<Proveedor>[] = [
         {Array.from({ length: 5 }).map((_, i) => (
           <span key={i} className={`h-2 w-2 rounded-full ${i < row.original.rating ? "bg-warning" : "bg-muted"}`} />
         ))}
+      </div>
+    ),
+  },
+  {
+    id: "acciones",
+    header: "",
+    cell: ({ row }) => (
+      <div className="flex items-center justify-end gap-2">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => window.location.href = `/proveedores/${row.original.id}`}
+        >
+          Ver detalle
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => window.location.href = `/proveedores/${row.original.id}/edit`}
+        >
+          <Edit className="h-3.5 w-3.5" /> Editar
+        </Button>
       </div>
     ),
   },

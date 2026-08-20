@@ -81,6 +81,7 @@ export interface Oferta {
   notas_internas: string | null
   porcentaje_ganancia: number | null
   fichas?: FichaOferta[]
+  pagos?: { estado: string; monto: number }[]
   created_at: string
   updated_at: string
 }
