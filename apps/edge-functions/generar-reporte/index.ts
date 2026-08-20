@@ -1,6 +1,6 @@
 import { handleCors, corsHeaders } from "../_shared/cors.ts"
 import { createSupabaseClient } from "../_shared/supabase.ts"
-import { ok, badRequest, unauthorized, serverError, notFound } from "../_shared/response.ts"
+import { badRequest, unauthorized } from "../_shared/response.ts"
 
 interface ReporteRequest {
   tipo: "documentos" | "ofertas" | "clientes" | "productos" | "facturas" | "cobros" | "pagos" | "gastos"
@@ -42,62 +42,41 @@ Deno.serve(async (req: Request) => {
     }
 
     const results = await generarReporte(supabase, tipo, filtro, limit || 5000)
-    const fileName = `${tipo}-${Date.now()}`
+
+    let blob: Blob
+    let extension: string
 
     if (formato === "csv") {
       const csv = generarCSV(results, tipo)
-      const path = `reportes/${fileName}.csv`
-      const { error: uploadError } = await supabase.storage
-        .from("reportes")
-        .upload(path, new Blob([csv], { type: "text/csv" }), {
-          cacheControl: "3600",
-          upsert: true,
-        })
-
-      if (uploadError) return serverError(uploadError.message)
-
-      const { data: { publicUrl } } = supabase.storage.from("reportes").getPublicUrl(path)
-      return ok({ message: "Reporte generado", url: publicUrl, fileName: `${fileName}.csv` })
+      blob = new Blob([csv], { type: "text/csv" })
+      extension = "csv"
+    } else if (formato === "excel") {
+      blob = await generarExcel(results, tipo)
+      extension = "xlsx"
+    } else if (formato === "pdf") {
+      blob = await generarPDF(results, tipo)
+      extension = "pdf"
+    } else {
+      return badRequest("Formato no soportado")
     }
 
-    if (formato === "excel") {
-      const excel = await generarExcel(results, tipo)
-      const path = `reportes/${fileName}.xlsx`
-      const { error: uploadError } = await supabase.storage
-        .from("reportes")
-        .upload(path, excel, {
-          contentType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-          cacheControl: "3600",
-          upsert: true,
-        })
-
-      if (uploadError) return serverError(uploadError.message)
-
-      const { data: { publicUrl } } = supabase.storage.from("reportes").getPublicUrl(path)
-      return ok({ message: "Reporte generado", url: publicUrl, fileName: `${fileName}.xlsx` })
-    }
-
-    if (formato === "pdf") {
-      const pdf = await generarPDF(results, tipo)
-      const path = `reportes/${fileName}.pdf`
-      const { error: uploadError } = await supabase.storage
-        .from("reportes")
-        .upload(path, pdf, {
-          contentType: "application/pdf",
-          cacheControl: "3600",
-          upsert: true,
-        })
-
-      if (uploadError) return serverError(uploadError.message)
-
-      const { data: { publicUrl } } = supabase.storage.from("reportes").getPublicUrl(path)
-      return ok({ message: "Reporte generado", url: publicUrl, fileName: `${fileName}.pdf` })
-    }
-
-    return badRequest("Formato no soportado")
+    const fileName = `${tipo}-${Date.now()}.${extension}`
+    return new Response(blob, {
+      headers: {
+        ...corsHeaders,
+        "Content-Type": blob.type,
+        "Content-Disposition": `attachment; filename="${fileName}"`,
+      },
+    })
   } catch (error) {
     console.error("Error generando reporte:", error)
-    return serverError(error)
+    return new Response(
+      JSON.stringify({ error: true, message: "Error interno del servidor" }),
+      {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      }
+    )
   }
 })
 

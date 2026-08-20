@@ -829,12 +829,22 @@ export function useDashboardKPIs() {
 
 export function useReporte() {
   return useMutation({
-    mutationFn: (data: { tipo: string; formato: string; filtro?: Record<string, unknown> }) =>
-      fetch("/api/reportes", {
+    mutationFn: async (data: { tipo: string; formato: string; filtro?: Record<string, unknown> }) => {
+      const res = await fetch("/api/reportes", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
-      }).then((res) => res.json()) as Promise<{ url?: string; error?: string }>,
+      })
+      if (!res.ok) {
+        const err = await res.json().catch(() => null)
+        throw new Error(err?.error || "Error generando reporte")
+      }
+      const blob = await res.blob()
+      const disposition = res.headers.get("Content-Disposition") ?? ""
+      const match = disposition.match(/filename="?([^";]+)"?/)
+      const ext = data.formato === "excel" ? "xlsx" : data.formato
+      return { blob, fileName: match?.[1] ?? `reporte-${data.tipo}.${ext}` }
+    },
   })
 }
 

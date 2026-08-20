@@ -22,13 +22,16 @@ export function ExportButton({
   const handleExport = async (formato: "excel" | "csv" | "pdf") => {
     setIsLoading(true)
     try {
-      const data = await generarReporte({ tipo, formato, filtro })
-      if (data.url) {
-        window.open(data.url, "_blank")
-        toast.success(`Reporte ${formato.toUpperCase()} generado`)
-      } else {
-        toast.error(data.error || "Error generando reporte")
-      }
+      const { blob, fileName } = await generarReporte({ tipo, formato, filtro })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement("a")
+      a.href = url
+      a.download = fileName
+      document.body.appendChild(a)
+      a.click()
+      a.remove()
+      URL.revokeObjectURL(url)
+      toast.success(`Reporte ${formato.toUpperCase()} descargado`)
     } catch (error) {
       toast.error((error as Error).message)
     } finally {

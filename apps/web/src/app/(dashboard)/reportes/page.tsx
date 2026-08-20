@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { PageHeader } from "@/components/shared/page-header"
 import { useReporte } from "@/lib/queries"
+import { toast } from "sonner"
 
 const reportes = [
   { tipo: "ofertas", label: "Ofertas", desc: "Reporte de ofertas comerciales" },
@@ -30,11 +31,21 @@ export default function ReportesPage() {
     generar(
       { tipo, formato },
       {
-        onSuccess: (data) => {
-          if (data.url) window.open(data.url, "_blank")
+        onSuccess: ({ blob, fileName }) => {
+          const url = URL.createObjectURL(blob)
+          const a = document.createElement("a")
+          a.href = url
+          a.download = fileName
+          document.body.appendChild(a)
+          a.click()
+          a.remove()
+          URL.revokeObjectURL(url)
           setDescargando(null)
         },
-        onError: () => setDescargando(null),
+        onError: (error) => {
+          toast.error(error.message)
+          setDescargando(null)
+        },
       }
     )
   }
