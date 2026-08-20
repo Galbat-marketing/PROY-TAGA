@@ -6,18 +6,24 @@ const EDGE_FUNCTIONS_URL =
 
 export async function POST(request: Request) {
   try {
+    console.log("[reportes] Iniciando petición")
     const supabase = await createServerSupabase()
     const {
       data: { session },
     } = await supabase.auth.getSession()
 
     if (!session?.access_token) {
+      console.log("[reportes] Sin sesión")
       return NextResponse.json({ error: "No autorizado" }, { status: 401 })
     }
 
     const body = await request.json()
+    console.log("[reportes] Body:", body)
 
-    const response = await fetch(`${EDGE_FUNCTIONS_URL}/generar-reporte`, {
+    const edgeUrl = `${EDGE_FUNCTIONS_URL}/generar-reporte`
+    console.log("[reportes] Llamando a:", edgeUrl)
+
+    const response = await fetch(edgeUrl, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -26,8 +32,11 @@ export async function POST(request: Request) {
       body: JSON.stringify(body),
     })
 
+    console.log("[reportes] Respuesta edge function:", response.status, response.statusText)
+
     if (!response.ok) {
       const data = await response.json().catch(() => null)
+      console.log("[reportes] Error edge:", data)
       return NextResponse.json(
         { error: data?.message || data?.error || "Error generando reporte" },
         { status: response.status }
@@ -44,6 +53,7 @@ export async function POST(request: Request) {
       },
     })
   } catch (error) {
+    console.error("[reportes] Error capturado:", error)
     return NextResponse.json(
       { error: (error as Error).message },
       { status: 500 }
