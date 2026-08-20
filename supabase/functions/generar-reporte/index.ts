@@ -1,6 +1,65 @@
-import { handleCors, corsHeaders } from "../_shared/cors.ts"
-import { createSupabaseClient } from "../_shared/supabase.ts"
-import { badRequest, unauthorized } from "../_shared/response.ts"
+// ============================================
+// generar-reporte — self-contained edge function
+// (no imports from ../_shared so it deploys via CLI or Dashboard)
+// ============================================
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type, x-application-name",
+  "Access-Control-Max-Age": "86400",
+}
+
+function handleCors(req: Request): Response | null {
+  if (req.method === "OPTIONS") {
+    return new Response("ok", { headers: corsHeaders })
+  }
+  return null
+}
+
+function createSupabaseClient(req: Request) {
+  const authHeader = req.headers.get("Authorization") ?? ""
+  const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? ""
+  const supabaseKey = Deno.env.get("SUPABASE_ANON_KEY") ?? ""
+  return createClient(supabaseUrl, supabaseKey, {
+    global: {
+      headers: { Authorization: authHeader },
+    },
+    auth: {
+      persistSession: false,
+    },
+  })
+}
+
+function ok(data: unknown): Response {
+  return new Response(JSON.stringify(data), {
+    headers: { ...corsHeaders, "Content-Type": "application/json" },
+  })
+}
+
+function badRequest(message: string): Response {
+  return new Response(JSON.stringify({ error: true, message }), {
+    status: 400,
+    headers: { ...corsHeaders, "Content-Type": "application/json" },
+  })
+}
+
+function unauthorized(): Response {
+  return new Response(JSON.stringify({ error: true, message: "No autorizado" }), {
+    status: 401,
+    headers: { ...corsHeaders, "Content-Type": "application/json" },
+  })
+}
+
+function serverError(): Response {
+  return new Response(JSON.stringify({ error: true, message: "Error interno del servidor" }), {
+    status: 500,
+    headers: { ...corsHeaders, "Content-Type": "application/json" },
+  })
+}
+
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.46.1"
 
 interface ReporteRequest {
   tipo: "documentos" | "ofertas" | "clientes" | "productos" | "facturas" | "cobros" | "pagos" | "gastos"
@@ -70,13 +129,7 @@ Deno.serve(async (req: Request) => {
     })
   } catch (error) {
     console.error("Error generando reporte:", error)
-    return new Response(
-      JSON.stringify({ error: true, message: "Error interno del servidor" }),
-      {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      }
-    )
+    return serverError()
   }
 })
 
