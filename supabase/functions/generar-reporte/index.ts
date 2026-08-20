@@ -188,8 +188,8 @@ function generarCSV(data: Reporte[], tipo: string): string {
 }
 
 async function generarExcel(data: Reporte[], tipo: string): Promise<Blob> {
-  const { ExcelJS } = await import("npm:exceljs")
-  const workbook = new ExcelJS.Workbook()
+  const { Workbook } = await import("npm:exceljs")
+  const workbook = new Workbook()
   const worksheet = workbook.addWorksheet(tipo)
 
   worksheet.columns = [
