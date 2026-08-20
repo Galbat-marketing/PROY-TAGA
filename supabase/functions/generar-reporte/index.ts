@@ -139,7 +139,19 @@ async function generarReporte(
   filtro?: Record<string, unknown>,
   limit: number = 5000
 ): Promise<Reporte[]> {
-  let query = supabase.from(tipo).select("*").limit(limit)
+  const relaciones: Record<string, string> = {
+    documentos: "*, cliente(nombre), proveedor(nombre)",
+    ofertas: "*, cliente(nombre)",
+    clientes: "*",
+    productos: "*, categoria(nombre)",
+    facturas: "*, cliente(nombre)",
+    cobros: "*, cliente(nombre), factura(folio,total)",
+    pagos: "*, proveedor(nombre), factura(folio,total)",
+    gastos: "*, proveedor(nombre), categoria(nombre)",
+  }
+
+  const select = relaciones[tipo] || "*"
+  let query = supabase.from(tipo).select(select).limit(limit)
 
   if (filtro) {
     for (const [key, value] of Object.entries(filtro)) {
@@ -188,8 +200,8 @@ function generarCSV(data: Reporte[], tipo: string): string {
 }
 
 async function generarExcel(data: Reporte[], tipo: string): Promise<Blob> {
-  const { Workbook } = await import("npm:exceljs")
-  const workbook = new Workbook()
+  const ExcelJS = (await import("npm:exceljs")).default
+  const workbook = new ExcelJS.Workbook()
   const worksheet = workbook.addWorksheet(tipo)
 
   worksheet.columns = [
